@@ -21,7 +21,7 @@ case "${1:-}" in
   branch)
     check
     [ -z "$(git status --porcelain)" ] || { echo "commit first (clean tree required)" >&2; exit 1; }
-    V="$(cat VERSION)"; B="public/$V"
+    V="$(cat VERSION)"; B="${GEL_PUBLIC_BRANCH:-public/$V}"; PARENT_ARGS=(); [ -z "${GEL_PUBLIC_PARENT:-}" ] || PARENT_ARGS=(-p "$GEL_PUBLIC_PARENT")   # a child commit for later site-only updates
     git rev-parse --verify -q "refs/heads/$B" >/dev/null && { echo "branch $B already exists; not overwriting" >&2; exit 1; }
     COMMIT="$(git rev-parse --short=12 HEAD)"
     # Plumbing only: a temporary index, no checkout, the working tree and the current branch are never touched.
@@ -30,7 +30,7 @@ case "${1:-}" in
     git ls-tree -r --name-only HEAD | grep -E "$EXCLUDE" | GIT_INDEX_FILE="$TMPIDX" xargs -I{} git update-index --force-remove -- "{}"
     TREE="$(GIT_INDEX_FILE="$TMPIDX" git write-tree)"; rm -f "$TMPIDX"
     NEW="$(GIT_AUTHOR_NAME=GDC GIT_AUTHOR_EMAIL=noreply@gordas.dev GIT_COMMITTER_NAME=GDC GIT_COMMITTER_EMAIL=noreply@gordas.dev \
-           git commit-tree "$TREE" -m "Scaner GDC $V" -m "Source snapshot of the private development history at $COMMIT.")"
+           git commit-tree "$TREE" ${PARENT_ARGS[@]+"${PARENT_ARGS[@]}"} -m "Scaner GDC $V" -m "Source snapshot of the private development history at $COMMIT.")"
     git update-ref "refs/heads/$B" "$NEW"
     git log --format='%h %an <%ae> %s' -1 "$B"
     echo "local branch $B created from $COMMIT (not pushed)" ;;
