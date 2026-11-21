@@ -187,7 +187,7 @@ def page(L):
 <title>{e(L['title'])}</title><meta name="description" content="{e(L['desc'])}">
 <meta name="color-scheme" content="light dark"><link rel="canonical" href="{site}{path[L['code']]}">{alts}
 <meta property="og:title" content="Scaner GDC"><meta property="og:description" content="{e(L['desc'])}"><meta property="og:type" content="website">
-<link rel="icon" type="image/svg+xml" href="{base}assets/logo.svg"><link rel="stylesheet" href="{base}assets/style.css"></head>
+<link rel="icon" type="image/svg+xml" href="{base}assets/logo.svg"><link rel="stylesheet" href="{base}assets/style.css?v={V}-2"></head>
 <body><a class="skip" href="#main">{e(L['skip'])}</a>
 <header class="top"><div class="wrap"><a class="brand" href="{base or './'}"><img src="{base}assets/logo.svg" alt="" width="34" height="34"><span>Scaner GDC</span></a>
 <nav class="main" aria-label="Main">{nav}</nav><nav class="lang" aria-label="Language">{langs}</nav></div></header>
