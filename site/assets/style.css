@@ -69,3 +69,5 @@ footer .wrap{display:flex;gap:1rem 2rem;flex-wrap:wrap;justify-content:space-bet
   nav.main{order:3;width:100%}
 }
 .btn.off{background:transparent;color:var(--ink-2);border:1px dashed currentColor;cursor:default;font-weight:500}
+.facts dd,.facts dt,.split>*{min-width:0}
+.facts dd{overflow-wrap:anywhere;word-break:break-all}
