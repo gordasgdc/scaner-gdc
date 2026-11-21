@@ -1,0 +1,6 @@
+{
+  "repository": "https://github.com/gordasgdc/scaner-gdc",
+  "pages_url": "https://gordasgdc.github.io/scaner-gdc/",
+  "stable_asset": "ScanerGDC-macOS.dmg",
+  "versioned_asset": "ScanerGDC-macOS-{version}.dmg"
+}

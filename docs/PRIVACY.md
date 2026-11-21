@@ -1,0 +1,12 @@
+# Privacy and online access
+
+Scaner GDC works fully offline. The only network feature is the optional **product details** lookup (cover, short description, producer, official page).
+
+- **Off by default.** It starts only when you press *Search Cover and Details*, *Associate Official Page…* or *Fill Items Without Cover…*, and the first use shows an explanation.
+- **Sent:** the technical name, producer and identifier of the selected items (or the page address you provide), over https, with a generic client name (no cookies, no accounts, no identifiers).
+- **Never sent:** file paths, file contents, LUT/DCTL files or bundles, licence or serial data, your user name, your inventory (a batch only covers the selection you confirm).
+- **Addresses:** https only, public hosts only (no localhost, private or link-local addresses, no credentials in the address); redirects are re-checked, with limits on number, time and size.
+- **Images:** the real type and dimensions are checked, large or animated images are refused, and the result is re-encoded (metadata dropped). Page text is shown as plain text.
+- **Rights:** the app does not assume an image found online may be redistributed. Online images are kept only on your Mac (in the app's cache) with their source and date; they are never added to the app, the repository, a release or the website. If rights are unclear, keep the link or choose your own image.
+- **Your data stays local:** associations and your own images live in the app's Application Support folder; clearing the cache removes downloaded covers only.
+- **Discovery (optional, your own key):** automatic search needs a search service. This version can use the Brave Search API **only if you enter your own key** (Settings → Product details; the key is kept in your macOS Keychain, never in files or the source). Without a key nothing is searched and nothing is sent, and items are reported as *not searched*, not as *not found*. With a key, the product's technical name, producer and kind are sent to Brave as a search query (never paths, files, licences or inventory); Brave's pricing, limits and terms apply to your account. Search results are kept **in memory only** (never written to disk) because Brave's standard plan does not allow storing them; you can open a result and then associate the page yourself — only the address you paste is saved, and details are then read from that page. Live behaviour of this path has not been verified with a real key yet (see `docs/DISCOVERY.md`).
