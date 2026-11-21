@@ -23,7 +23,8 @@ previews it, and lets you set items aside and bring them back. Scanning only rea
 ## Download and install
 Releases: https://github.com/gordasgdc/scaner-gdc/releases · Site: https://gordasgdc.github.io/scaner-gdc/
 **Updates:** the app has no self-updater and does not check for updates; to update, download the new release and replace the app. The Corresponding Source of every release is the tagged commit of this repository (including the build scripts).
-Open the disk image and drag **Scaner GDC** to Applications. Requires **macOS 14 (Sonoma) or later**; the package is universal (Apple silicon and Intel) and is signed with a Developer ID and notarized by Apple.
+Open the disk image and drag **Scaner GDC** to Applications. Requires **macOS 14 (Sonoma) or later**; the package is universal (Apple silicon and Intel) and is Developer ID signed and notarized by Apple, with a stapled ticket.
+Network use: scanning is local and needs no internet or account; only the optional product-details features use the internet when you ask. No telemetry, no automatic upload of your inventory ([privacy](docs/PRIVACY.md)).
 
 ## Reporting problems
 Open an issue and use the template (`.github/ISSUE_TEMPLATE`). Please include the app version, macOS version, what you did and what you expected.

@@ -21,6 +21,8 @@ secs = {}
 for code, f in pages.items():
     txt = f.read_text(encoding="utf-8"); p = P(); p.feed(txt); secs[code] = p.sections
     if p.scripts: errs.append(f"{code}: <script> present")
+    if re.search(r"does not connect to the internet|does not collect data|nu se conectează la internet|nu colectează date|no se conecta a internet|ni recopila datos|without workarounds|fără ocolișuri|sin rodeos|There is no network access", txt, re.I): errs.append(f"{code}: absolute privacy/Gatekeeper claim")
+    if not p.btnoff and "releases/download/v" not in txt: errs.append(f"{code}: primary download should use the versioned asset")
     if re.search(r"/Users/|/Volumes/|gordasgdc@|academiagdc", txt): errs.append(f"{code}: personal data")
     for h in p.links:
         if h is None or h == "": errs.append(f"{code}: empty href"); continue

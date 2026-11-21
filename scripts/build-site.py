@@ -15,7 +15,8 @@ a = ap.parse_args()
 ROOT = pathlib.Path(__file__).resolve().parent.parent / "site"
 CFG = json.loads((pathlib.Path(__file__).resolve().parent / "publish-config.json").read_text())
 REPO = CFG["repository"]
-DL = f'{REPO}/releases/latest/download/{CFG["stable_asset"]}'  # future URL: only linked when --published
+DL = f'{REPO}/releases/download/v{a.version}/{CFG["versioned_asset"].format(version=a.version)}'  # versioned asset (protocol 41); only linked when --published
+DL_STABLE = f'{REPO}/releases/latest/download/{CFG["stable_asset"]}'   # stable-name copy kept for compatibility
 V = a.version
 PUB = a.published
 if PUB and not (a.dmg_size != "—" and a.sha256 != "—" and a.archs): sys.exit("--published requires --dmg-size, --sha256 and --archs derived from the final package")
@@ -51,7 +52,7 @@ T = {
  lim=["Present on disk does not mean loaded, compatible or licensed in any host application.",
       "Previews of .cube files are rendered on a built-in reference image with sRGB assumed, 8-bit. They show the character of a LUT, not a host-accurate result on your footage.",
       "Vendor and version appear only when the package declares them; nothing is guessed.",
-      "Plug-ins are never loaded, scanned by running them, or validated. There is no network access and no account."],
+      "Plug-ins are never loaded, scanned by running them, or validated. Scanning needs no network access and no account; only the optional product-details features use the internet, when you ask for them."],
  mg_h="Disable and restore, with a way back",
  mg_p="Choosing “Move to Disabled…” first checks the item, then asks for confirmation in the app. The item is moved — never deleted — to a folder next to its source folder named “… (Disabled by GDC)”, or to a folder you choose in Settings. On the same volume the move is a single atomic rename that refuses to overwrite anything. Across volumes the item is copied, verified byte by byte, and only then is the original moved to the Trash.",
  mg_list=["Every operation is written to a journal; if the app or the Mac stops half-way, the next launch finishes or rolls back safely and tells you what it did.",
@@ -60,7 +61,7 @@ T = {
           "Host applications keep loaded plug-ins until they restart. The app warns when a known host is running and never closes anything.",
           "Notarization by Apple does not grant file access; macOS permissions still apply."],
  cap2="Confirmation before any move: source, destination and warnings are shown first.",
- dl_h="Download and install", dl_p=f"Version {V}. Open the disk image and drag Scaner GDC to Applications. The app is signed with a Developer ID certificate and notarized by Apple, so macOS opens it without workarounds.",
+ dl_h="Download and install", dl_p=f"Version {V}. Open the disk image and drag Scaner GDC to Applications. The app is signed with a Developer ID certificate, notarized by Apple and carries a stapled notarization ticket.",
  req="Requirements", reqs=[("macOS","14 (Sonoma) or later"),("Mac",ARCH("en")),("Size",a.dmg_size if PUB else PEND["en"]),("SHA-256",a.sha256 if PUB else PEND["en"])],
  relnotes="Release notes", rel=[(V,"Scanning of standard and custom folders, previews for .cube LUTs and bundle icons, recoverable Disable and Restore, diagnostics export, accessibility labels, new icon.")],
  allrel="All releases and notes",
@@ -69,7 +70,7 @@ T = {
  lic_dl=[("Author","Cristi Gordaș (GDC)"),("Licence","GNU General Public License v3 only, with additional terms under section 7 (attribution, no misrepresentation of origin, no trademark grant)"),("Credit shown in About",CREDIT),("Source",REPO)],
  lic_note="A modified version must keep this credit in its About window and say clearly that it is modified and not made or endorsed by the author. The credit is not required on anything you process with the app. The name and logo are outside the licence grant: the unmodified logo may identify the original; modified versions use their own identity (a neutral icon is provided). The app has no self-updater: to update, download the new release.",
  plat_h="Part of the GDC family", plat_p="Scaner GDC is a separate app. It sits next to GDC Plugin Manager, the platform where GDC apps are presented and managed.",
- plat_link="GDC Plugin Manager", foot_priv="Scaner GDC does not connect to the internet and does not collect data.",
+ plat_link="GDC Plugin Manager", foot_priv="Local scanning; internet only for optional product details when you ask. No telemetry.", net_h="Privacy and network", net_l=["Stays on your Mac: the inventory, settings, associations, your images and logs. Scanning needs no internet and no account.","When you ask for it: associating an official page, “Search Cover and Details” and downloading a cover contact the address you give (or a page you open), with a generic client name. Only the technical name, producer and identifier are used; never paths, files, licences or your inventory.","Optional advanced search (experimental, off by default): uses the Brave Search API with your own key, stored in your Keychain. It is a separate service from the Brave browser, with its own terms and possible costs. Results are shown in memory only and never saved. Authenticated search has not been verified yet.","No telemetry, no automatic upload of your inventory, no update check."], net_more="Full privacy notes", lic_links=[('Licence','LICENSE'),('Additional terms','LICENSE-ADDITIONAL-TERMS.md'),('Privacy','docs/PRIVACY.md')], stable_lbl="Stable-name copy",
  shot_alt1="Scaner GDC window with a grid of plug-ins and LUTs and an inspector showing an original and a LUT preview",
  shot_alt2="Confirmation dialog before moving an OFX effect to the Disabled folder"),
 "ro": dict(code="ro", lang="Română", title="Scaner GDC — inventar și previzualizare pentru pluginuri OFX, LUT, DCTL și audio pe macOS",
@@ -95,7 +96,7 @@ T = {
  lim=["Prezent pe disc nu înseamnă încărcat, compatibil sau licențiat într-o aplicație gazdă.",
       "Previzualizările fișierelor .cube sunt randate pe o imagine de referință încorporată, cu sRGB presupus, pe 8 biți. Arată caracterul unui LUT, nu un rezultat exact din aplicația gazdă pe materialul tău.",
       "Producătorul și versiunea apar doar dacă pachetul le declară; nu se ghicește nimic.",
-      "Pluginurile nu sunt încărcate, rulate sau validate. Nu există acces la rețea și nici cont."],
+      "Pluginurile nu sunt încărcate, rulate sau validate. Scanarea nu are nevoie de rețea sau cont; doar funcțiile opționale de detalii despre produs folosesc internetul, când le ceri."],
  mg_h="Dezactivare și restaurare, cu cale de întoarcere",
  mg_p="„Mută în Dezactivate…” verifică întâi elementul, apoi cere confirmarea în aplicație. Elementul este mutat — niciodată șters — într-un folder lângă folderul sursă, numit „… (Disabled by GDC)”, sau într-un folder ales de tine în Setări. Pe același volum mutarea este o redenumire atomică, care refuză să suprascrie ceva. Între volume elementul este copiat, verificat octet cu octet și abia apoi originalul este mutat în Coș.",
  mg_list=["Fiecare operație este scrisă într-un jurnal; dacă aplicația sau Mac-ul se oprește la jumătate, la următoarea pornire operația este terminată sau anulată în siguranță și ți se spune ce s-a făcut.",
@@ -104,7 +105,7 @@ T = {
           "Aplicațiile gazdă păstrează pluginurile încărcate până la repornire. Aplicația avertizează când rulează o gazdă cunoscută și nu închide nimic.",
           "Notarizarea Apple nu acordă acces la fișiere; permisiunile macOS rămân în vigoare."],
  cap2="Confirmare înainte de orice mutare: sursa, destinația și avertismentele sunt afișate mai întâi.",
- dl_h="Descărcare și instalare", dl_p=f"Versiunea {V}. Deschide imaginea de disc și trage Scaner GDC în Applications. Aplicația este semnată cu certificat Developer ID și notarizată de Apple, deci macOS o deschide fără ocolișuri.",
+ dl_h="Descărcare și instalare", dl_p=f"Versiunea {V}. Deschide imaginea de disc și trage Scaner GDC în Applications. Aplicația este semnată cu certificat Developer ID, notarizată de Apple și are tichetul de notarizare atașat (stapled).",
  req="Cerințe", reqs=[("macOS","14 (Sonoma) sau mai nou"),("Mac",ARCH("ro")),("Dimensiune",a.dmg_size if PUB else PEND["ro"]),("SHA-256",a.sha256 if PUB else PEND["ro"])],
  relnotes="Note de versiune", rel=[(V,"Scanarea folderelor standard și proprii, previzualizări pentru LUT .cube și iconuri de pachet, Dezactivare și Restaurare recuperabile, export de diagnostic, etichete de accesibilitate, pictogramă nouă.")],
  allrel="Toate versiunile și notele",
@@ -113,7 +114,7 @@ T = {
  lic_dl=[("Autor","Cristi Gordaș (GDC)"),("Licență","GNU General Public License v3 only, cu termeni suplimentari conform secțiunii 7 (atribuire, fără prezentare înșelătoare a originii, fără acordare de drepturi de marcă)"),("Credit afișat în Despre",CREDIT),("Sursă",REPO)],
  lic_note="O versiune modificată trebuie să păstreze acest credit în fereastra Despre și să spună clar că este modificată și nu a fost creată sau susținută de autor. Creditul nu este necesar pe nimic din ce procesezi cu aplicația. Numele și logo-ul sunt în afara licenței: logo-ul nealterat poate identifica originalul; versiunile modificate folosesc propria identitate (există o pictogramă neutră). Aplicația nu are actualizare automată: pentru actualizare, descarcă noua versiune.",
  plat_h="Parte din familia GDC", plat_p="Scaner GDC este o aplicație separată. Se află alături de GDC Plugin Manager, platforma în care aplicațiile GDC sunt prezentate și gestionate.",
- plat_link="GDC Plugin Manager", foot_priv="Scaner GDC nu se conectează la internet și nu colectează date.",
+ plat_link="GDC Plugin Manager", foot_priv="Scanare locală; internet doar pentru detalii opționale despre produs, când le ceri. Fără telemetrie.", net_h="Confidențialitate și rețea", net_l=["Rămân pe Mac: inventarul, setările, asocierile, imaginile tale și jurnalele. Scanarea nu are nevoie de internet sau cont.","Când le ceri: asocierea unei pagini oficiale, „Caută copertă și detalii” și descărcarea unei coperți contactează adresa dată de tine (sau o pagină deschisă), cu un nume generic de client. Se folosesc doar numele tehnic, producătorul și identificatorul; niciodată căi, fișiere, licențe sau inventarul.","Căutare avansată opțională (experimentală, oprită implicit): folosește Brave Search API cu cheia ta, păstrată în Keychain. Este un serviciu separat de browserul Brave, cu propriile condiții și eventuale costuri. Rezultatele apar doar în memorie și nu se salvează. Căutarea autentificată nu a fost încă verificată.","Fără telemetrie, fără încărcare automată a inventarului, fără verificare de actualizări."], net_more="Notele complete de confidențialitate", lic_links=[('Licență','LICENSE'),('Termeni suplimentari','LICENSE-ADDITIONAL-TERMS.md'),('Confidențialitate','docs/PRIVACY.md')], stable_lbl="Copie cu nume stabil",
  shot_alt1="Fereastra Scaner GDC cu o grilă de pluginuri și LUT-uri și un inspector cu previzualizare originală și cu LUT",
  shot_alt2="Dialog de confirmare înainte de mutarea unui efect OFX în folderul Dezactivate"),
 "es": dict(code="es", lang="Español", title="Scaner GDC — inventario y vista previa de plug-ins OFX, LUT, DCTL y de audio para macOS",
@@ -139,7 +140,7 @@ T = {
  lim=["Estar en el disco no significa estar cargado, ser compatible ni tener licencia en una aplicación anfitriona.",
       "Las vistas previas de archivos .cube se renderizan sobre una imagen de referencia integrada, con sRGB supuesto y 8 bits. Muestran el carácter de una LUT, no un resultado exacto del anfitrión sobre tu material.",
       "El fabricante y la versión aparecen solo si el paquete los declara; no se adivina nada.",
-      "Los plug-ins no se cargan, no se ejecutan ni se validan. No hay acceso a la red ni cuenta."],
+      "Los plug-ins no se cargan, no se ejecutan ni se validan. El escaneo no necesita red ni cuenta; solo las funciones opcionales de detalles de producto usan internet, cuando las pides."],
  mg_h="Desactivar y restaurar, con vuelta atrás",
  mg_p="«Mover a Desactivados…» comprueba primero el elemento y después pide confirmación en la app. El elemento se mueve —nunca se borra— a una carpeta junto a su carpeta de origen llamada «… (Disabled by GDC)», o a una carpeta que elijas en Ajustes. En el mismo volumen el movimiento es un único renombrado atómico que se niega a sobrescribir nada. Entre volúmenes el elemento se copia, se verifica byte a byte y solo entonces el original pasa a la Papelera.",
  mg_list=["Cada operación se escribe en un diario; si la app o el Mac se detienen a medias, en el siguiente arranque la operación se completa o se deshace con seguridad y se te indica qué se hizo.",
@@ -148,7 +149,7 @@ T = {
           "Las aplicaciones anfitrionas conservan los plug-ins cargados hasta reiniciarse. La app avisa si hay un anfitrión conocido en ejecución y nunca cierra nada.",
           "La notarización de Apple no concede acceso a archivos; los permisos de macOS siguen vigentes."],
  cap2="Confirmación antes de cualquier movimiento: primero se muestran origen, destino y avisos.",
- dl_h="Descarga e instalación", dl_p=f"Versión {V}. Abre la imagen de disco y arrastra Scaner GDC a Aplicaciones. La app está firmada con un certificado Developer ID y notarizada por Apple, por lo que macOS la abre sin rodeos.",
+ dl_h="Descarga e instalación", dl_p=f"Versión {V}. Abre la imagen de disco y arrastra Scaner GDC a Aplicaciones. La app está firmada con un certificado Developer ID, notarizada por Apple y lleva el ticket de notarización adjunto (stapled).",
  req="Requisitos", reqs=[("macOS","14 (Sonoma) o posterior"),("Mac",ARCH("es")),("Tamaño",a.dmg_size if PUB else PEND["es"]),("SHA-256",a.sha256 if PUB else PEND["es"])],
  relnotes="Notas de la versión", rel=[(V,"Escaneo de carpetas estándar y propias, vistas previas para LUT .cube e iconos de paquete, Desactivar y Restaurar recuperables, exportación de diagnóstico, etiquetas de accesibilidad, icono nuevo.")],
  allrel="Todas las versiones y notas",
@@ -157,7 +158,7 @@ T = {
  lic_dl=[("Autor","Cristi Gordaș (GDC)"),("Licencia","GNU General Public License v3, con un término de atribución conforme a la sección 7"),("Crédito mostrado en Acerca de",CREDIT),("Código",REPO)],
  lic_note="Una versión modificada debe conservar este crédito en su ventana Acerca de y decir claramente que está modificada y que no ha sido creada ni respaldada por el autor. El crédito no es necesario en nada de lo que proceses con la app. El nombre y el logotipo quedan fuera de la licencia: el logotipo sin modificar puede identificar el original; las versiones modificadas usan su propia identidad (hay un icono neutro). La app no tiene actualización automática: para actualizar, descarga la nueva versión.",
  plat_h="Parte de la familia GDC", plat_p="Scaner GDC es una app independiente. Convive con GDC Plugin Manager, la plataforma donde se presentan y gestionan las apps de GDC.",
- plat_link="GDC Plugin Manager", foot_priv="Scaner GDC no se conecta a internet ni recopila datos.",
+ plat_link="GDC Plugin Manager", foot_priv="Escaneo local; internet solo para detalles opcionales de producto, cuando los pides. Sin telemetría.", net_h="Privacidad y red", net_l=["Se queda en tu Mac: el inventario, los ajustes, las asociaciones, tus imágenes y los registros. El escaneo no necesita internet ni cuenta.","Cuando lo pides: asociar una página oficial, «Buscar portada y detalles» y descargar una portada contactan la dirección que indicas (o una página que abres), con un nombre de cliente genérico. Solo se usan el nombre técnico, el fabricante y el identificador; nunca rutas, archivos, licencias ni tu inventario.","Búsqueda avanzada opcional (experimental, desactivada por defecto): usa la Brave Search API con tu propia clave, guardada en el Llavero. Es un servicio distinto del navegador Brave, con sus propias condiciones y posibles costes. Los resultados solo se muestran en memoria y no se guardan. La búsqueda autenticada aún no se ha verificado.","Sin telemetría, sin subida automática de tu inventario, sin comprobación de actualizaciones."], net_more="Notas de privacidad completas", lic_links=[('Licencia','LICENSE'),('Términos adicionales','LICENSE-ADDITIONAL-TERMS.md'),('Privacidad','docs/PRIVACY.md')], stable_lbl="Copia con nombre estable",
  shot_alt1="Ventana de Scaner GDC con una cuadrícula de plug-ins y LUT y un inspector con vista previa original y con LUT",
  shot_alt2="Diálogo de confirmación antes de mover un efecto OFX a la carpeta de desactivados"),
 }
@@ -180,7 +181,10 @@ def page(L):
     lim = "".join(f"<li>{e(x)}</li>" for x in L["lim"]); mg = "".join(f"<li>{e(x)}</li>" for x in L["mg_list"])
     reqs = "".join(f"<dt>{e(k)}</dt><dd>{e(v)}</dd>" for k, v in L["reqs"])
     rel = "".join(f"<h3>{e(v)}</h3><p>{e(t)}</p>" for v, t in L["rel"])
-    lic = "".join(f"<dt>{e(k)}</dt><dd>{e(v)}</dd>" for k, v in L["lic_dl"])
+    def _v(v): return f'<a href="{e(v)}">{e(v)}</a>' if v.startswith("http") else e(v)
+    lic = "".join(f"<dt>{e(k)}</dt><dd>{_v(v)}</dd>" for k, v in L["lic_dl"]) + "".join(f'<dt>{e(k)}</dt><dd><a href="{REPO}/blob/main/{u}">{e(u)}</a></dd>' for k, u in L["lic_links"])
+    netl = "".join(f"<li>{e(t)}</li>" for t in L["net_l"])
+    stable = (f'<p class="meta"><a href="{DL_STABLE}">{e(CFG["stable_asset"])}</a> — {e(L["stable_lbl"])} · <a href="{REPO}/releases/download/v{V}/SHA256SUMS.txt">SHA256SUMS.txt</a></p>' if PUB else "")
     alts = "".join(f'<link rel="alternate" hreflang="{c}" href="{site}{path[c]}">' for c in ("en", "ro", "es")) + f'<link rel="alternate" hreflang="x-default" href="{site}">'
     return f"""<!doctype html>
 <html lang="{L['code']}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -200,12 +204,13 @@ def page(L):
 <div class="tablewrap"><table><thead><tr>{th}</tr></thead><tbody>{rows}</tbody></table></div></div></section>
 <section id="manage"><div class="wrap split flip"><div><h2>{e(L['mg_h'])}</h2><p>{e(L['mg_p'])}</p><ul class="plain">{mg}</ul></div>
 <figure class="shot"><img src="{base}assets/shots/confirm.png" width="1600" height="975" alt="{e(L['shot_alt2'])}" loading="lazy"><figcaption>{e(L['cap2'])}</figcaption></figure></div></section>
-<section id="download"><div class="wrap split"><div><h2>{e(L['dl_h'])}</h2><p>{e(L['dl_p'])}</p><p>{btn(L)}</p><p><a href="{REPO}/releases">{e(L['allrel'])}</a></p></div>
+<section id="privacy"><div class="wrap split"><div><h2>{e(L['net_h'])}</h2></div><div><ul class="plain">{netl}</ul><p><a href="{REPO}/blob/main/docs/PRIVACY.md">{e(L['net_more'])}</a></p></div></div></section>
+<section id="download"><div class="wrap split"><div><h2>{e(L['dl_h'])}</h2><p>{e(L['dl_p'])}</p><p>{btn(L)}</p>{stable}<p><a href="{REPO}/releases">{e(L['allrel'])}</a></p></div>
 <div><h3>{e(L['req'])}</h3><dl class="facts">{reqs}</dl><h3 style="margin-top:1.6rem">{e(L['relnotes'])}</h3>{rel}</div></div></section>
 <section id="license"><div class="wrap split"><div><h2>{e(L['lic_h'])}</h2><p>{e(L['lic_p'])}</p><p class="note">{e(L['lic_note'])}</p></div>
 <div><dl class="facts">{lic}</dl><h3 style="margin-top:1.6rem">{e(L['plat_h'])}</h3><p>{e(L['plat_p'])} <a href="{PLATFORM}">{e(L['plat_link'])}</a></p></div></div></section>
 </main>
-<footer><div class="wrap"><span>{e(CREDIT)}</span><span>{e(L['foot_priv'])}</span><span><a href="{REPO}">GitHub</a></span></div></footer></body></html>
+<footer><div class="wrap"><span>{e(CREDIT)}</span><span>{e(L['foot_priv'])} <a href="{REPO}/blob/main/docs/PRIVACY.md">{e(L['net_h'])}</a></span><span><a href="{REPO}">GitHub</a></span></div></footer></body></html>
 """
 
 for c, L in T.items():

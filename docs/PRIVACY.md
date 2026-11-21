@@ -1,6 +1,8 @@
 # Privacy and online access
 
-Scaner GDC works fully offline. The only network feature is the optional **product details** lookup (cover, short description, producer, official page).
+**Local:** scanning, previews, management, the inventory, settings, associations, your images and logs work and stay on your Mac, with no internet and no account.
+**Internet, only when you ask:** the optional **product details** features (cover, short description, producer, official page) contact the address you give or open.
+**Not present:** telemetry, analytics, automatic upload of your inventory, update checks (the app does not check for updates).
 
 - **Off by default.** It starts only when you press *Search Cover and Details*, *Associate Official Page…* or *Fill Items Without Cover…*, and the first use shows an explanation.
 - **Sent:** the technical name, producer and identifier of the selected items (or the page address you provide), over https, with a generic client name (no cookies, no accounts, no identifiers).
