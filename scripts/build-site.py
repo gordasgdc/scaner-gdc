@@ -229,7 +229,7 @@ if a.published:
     import re
     ch = (pathlib.Path(__file__).resolve().parent.parent / "CHANGELOG.md").read_text(encoding="utf-8")
     m = re.search(r"^## " + re.escape(a.version) + r"\s*\n(.*?)(?=^## |\Z)", ch, re.S | re.M)
-    notes = " ".join(l[2:].strip().replace("`", "") for l in (m.group(1).splitlines() if m else []) if l.startswith("- "))
+    notes = " ".join(l[2:].strip().replace("`", "").replace("*", "") for l in (m.group(1).splitlines() if m else []) if l.startswith("- "))
     build = (pathlib.Path(__file__).resolve().parent.parent / "BUILD_NUMBER").read_text().strip()
     man = {"version": a.version, "build": build, "changes": notes, "mandatory": False,
            "download_url": {"mac": f"{CFG['repository']}/releases/download/v{a.version}/" + CFG["versioned_asset"].format(version=a.version)},

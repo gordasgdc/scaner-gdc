@@ -1,0 +1,12 @@
+{
+  "version": "0.6.0",
+  "build": "7",
+  "changes": "In-app updates. Scaner GDC → Check for Updates… and Settings → Updates show the installed version and check for a newer one. The app also checks once when it opens (you can turn this off). Results are distinct: update available (with release notes), up to date, or could not check. Nothing is downloaded or installed until you choose Update Now. The new version is downloaded with a progress bar (cancellable), verified (same app identity and developer, valid Apple signature and notarization, newer version), then replaces the app, which reopens. Your settings and data are kept. If anything fails, the installed version is left or restored as it was. Prerelease versions are never offered and the app never downgrades itself. Update checks send no identifier or usage data and are not telemetry. Moving from 0.5.1 (which has no updater) to 0.6.0 is a one-time manual download. Privacy and site texts now describe the update check accurately.",
+  "mandatory": false,
+  "download_url": {
+    "mac": "https://github.com/gordasgdc/scaner-gdc/releases/download/v0.6.0/ScanerGDC-macOS-0.6.0.dmg"
+  },
+  "sha256": "61acbc4a4b6458e2b758214a00a6685b1e6bfa348d0b802cb01addf58f0537ce",
+  "size": 3142554,
+  "min_os": "14.0"
+}
