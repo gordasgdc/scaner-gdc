@@ -22,7 +22,11 @@ Split into `build` (check + upload) and `deploy` (`needs: build`, only `deploy-p
 (the layout of GitHub's own Pages starter workflow). A failed deploy can be re-run alone without a second artifact. No retry loop; a real failure stays red.
 
 ## Verification
-Push-triggered runs after the change are recorded in `docs/PAGES_DIAGNOSIS.md` § Results (filled in after the runs).
+See Results.
 
 ## Results
-(pending)
+Push-triggered runs with the two-job layout (all attempt 1, no re-run, no manual dispatch):
+- 44957688669 (push b7b32c5): build 5 s, deploy started 4 s later, success.
+- 44958638096 (push 3b08d9b, workflow edit): success.
+- a third push (site/workflow edit) is recorded in the final report of the lot.
+Before the change: 3 of 5 push runs failed on attempt 1. Three successes do not prove the race is gone (it was intermittent); the layout removes the same-second listing that caused it, and any remaining failure stays visible (no retry loop).
