@@ -1,8 +1,13 @@
 # Privacy and online access
 
 **Local:** scanning, previews, management, the inventory, settings, associations, your images and logs work and stay on your Mac, with no internet and no account.
-**Internet, only when you ask:** the optional **product details** features (cover, short description, producer, official page) contact the address you give or open.
-**Not present:** telemetry, analytics, automatic upload of your inventory, update checks (the app does not check for updates).
+**Internet, two uses:** (1) the optional **product details** features (cover, short description, producer, official page) contact the address you give or open, only when you ask; (2) the **update check** (version 0.6.0 and later).
+**Not present:** telemetry, analytics, automatic upload of your inventory.
+
+## Updates (0.6.0 and later)
+- **Automatic, can be turned off (Settings → Updates):** once when the app opens, it requests `https://gordasgdc.github.io/scaner-gdc/update.json` (a small public file; a timestamp query parameter avoids stale caches). The request carries a generic client name and nothing else: no identifier, no inventory, no usage data, no version of your plug-ins. As with any web request, the website host (GitHub) sees the usual connection metadata such as your IP address.
+- **Only after you press “Update Now”:** the app downloads the disk image from the project's GitHub release, verifies it (SHA-256 against the manifest to detect corruption; then bundle ID, Apple Team ID, Developer ID signature, notarization ticket and a strictly newer version, none of which depend on the manifest), replaces the app and reopens it. Your settings and data are not touched. Nothing is installed without that action; a check failure at launch is only logged.
+- **An update check is not telemetry:** it fetches a file; it reports nothing about you or your use of the app. Prerelease versions are never offered and there is no automatic downgrade.
 
 - **Off by default.** It starts only when you press *Search Cover and Details*, *Associate Official Page…* or *Fill Items Without Cover…*, and the first use shows an explanation.
 - **Sent:** the technical name, producer and identifier of the selected items (or the page address you provide), over https, with a generic client name (no cookies, no accounts, no identifiers).

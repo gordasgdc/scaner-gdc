@@ -12,7 +12,8 @@ public struct FetchLimits: Sendable, Equatable {
     public static let image = FetchLimits(maxBytes: 8 * 1024 * 1024, timeout: 15)
 }
 
-public struct FetchResult: Sendable { public let data: Data; public let finalURL: URL; public let contentType: String? }
+public struct FetchResult: Sendable { public let data: Data; public let finalURL: URL; public let contentType: String?
+    public init(data: Data, finalURL: URL, contentType: String?) { self.data = data; self.finalURL = finalURL; self.contentType = contentType } }
 
 public enum FetchError: Error, Equatable, CustomStringConvertible {
     case blocked(URLPolicy.Rejection), tooManyRedirects, tooLarge, timeout, offline, http(Int), cancelled, badResponse(String)
@@ -35,6 +36,11 @@ public protocol HTTPFetcher: Sendable {
     func fetch(_ url: URL, limits: FetchLimits) async throws -> FetchResult
 }
 
+/// Streaming download to a file with progress (used only by the updater, after an explicit user action).
+public protocol HTTPDownloader: Sendable {
+    func download(_ url: URL, maxBytes: Int64, timeout: TimeInterval, to file: URL, progress: @escaping @Sendable (Int64, Int64?) -> Void) async throws
+}
+
 /// Redirect bookkeeping, separated so it can be tested without a network.
 public struct RedirectGuard: Sendable {
     public private(set) var hops = 0
@@ -50,7 +56,7 @@ public struct RedirectGuard: Sendable {
 
 /// Real fetcher: https only, ephemeral session (no cookies, no cache, no credentials), generic User-Agent,
 /// every redirect hop re-validated, DNS result checked, bounded size and time, streaming read that stops at the cap.
-public final class URLSessionFetcher: NSObject, HTTPFetcher, @unchecked Sendable {
+public final class URLSessionFetcher: NSObject, HTTPFetcher, HTTPDownloader, @unchecked Sendable {
     public static let userAgent = "ScanerGDC (+product-details lookup; contact via the project page)"
     private let resolveCheck: @Sendable (String) -> Bool
     public init(resolveCheck: @escaping @Sendable (String) -> Bool = { URLPolicy.resolvedAddressesAllowed(host: $0) }) { self.resolveCheck = resolveCheck }
@@ -91,6 +97,51 @@ public final class URLSessionFetcher: NSObject, HTTPFetcher, @unchecked Sendable
             default: throw FetchError.badResponse(e.localizedDescription)
             }
         }
+    }
+
+    public func download(_ url: URL, maxBytes: Int64, timeout: TimeInterval, to file: URL, progress: @escaping @Sendable (Int64, Int64?) -> Void) async throws {
+        if case .failure(let r) = URLPolicy.validate(url) { throw FetchError.blocked(r) }
+        guard let host = url.host, resolveCheck(host) else { throw FetchError.blocked(.privateAddress) }
+        let cfg = URLSessionConfiguration.ephemeral
+        cfg.httpCookieStorage = nil; cfg.httpShouldSetCookies = false; cfg.urlCache = nil; cfg.requestCachePolicy = .reloadIgnoringLocalCacheData
+        cfg.timeoutIntervalForRequest = timeout; cfg.timeoutIntervalForResource = 600
+        cfg.urlCredentialStorage = nil; cfg.httpAdditionalHeaders = ["User-Agent": Self.userAgent]
+        let delegate = Delegate(maxRedirects: 5, resolveCheck: resolveCheck)
+        let session = URLSession(configuration: cfg, delegate: delegate, delegateQueue: nil)
+        defer { session.finishTasksAndInvalidate() }
+        let fm = FileManager.default
+        fm.createFile(atPath: file.path, contents: nil)
+        let out = try FileHandle(forWritingTo: file); defer { try? out.close() }
+        do {
+            let (bytes, resp) = try await session.bytes(for: URLRequest(url: url))
+            if let e = delegate.error { throw e }
+            guard let http = resp as? HTTPURLResponse, let final = http.url else { throw FetchError.badResponse("not HTTP") }
+            if case .failure(let r) = URLPolicy.validate(final) { throw FetchError.blocked(r) }
+            guard (200..<300).contains(http.statusCode) else { throw FetchError.http(http.statusCode) }
+            let total: Int64? = http.expectedContentLength > 0 ? http.expectedContentLength : nil
+            if let t = total, t > maxBytes { throw FetchError.tooLarge }
+            var buf = Data(); buf.reserveCapacity(64 * 1024); var done: Int64 = 0; var lastReport: Int64 = 0
+            for try await b in bytes {
+                buf.append(b)
+                if buf.count >= 64 * 1024 { try out.write(contentsOf: buf); done += Int64(buf.count); buf.removeAll(keepingCapacity: true)
+                    if done > maxBytes { throw FetchError.tooLarge }
+                    if done - lastReport >= 128 * 1024 { lastReport = done; progress(done, total) } }
+                if Task.isCancelled { throw FetchError.cancelled }
+            }
+            if !buf.isEmpty { try out.write(contentsOf: buf); done += Int64(buf.count) }
+            if done > maxBytes { throw FetchError.tooLarge }
+            progress(done, total)
+        } catch let e as FetchError { try? fm.removeItem(at: file); throw e }
+        catch let e as URLError {
+            try? fm.removeItem(at: file)
+            if let d = delegate.error { throw d }
+            switch e.code {
+            case .timedOut: throw FetchError.timeout
+            case .notConnectedToInternet, .networkConnectionLost, .dataNotAllowed, .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed: throw FetchError.offline
+            case .cancelled: throw delegate.error ?? FetchError.cancelled
+            default: throw FetchError.badResponse(e.localizedDescription)
+            }
+        } catch { try? fm.removeItem(at: file); throw error }
     }
 
     private final class Delegate: NSObject, URLSessionTaskDelegate, @unchecked Sendable {

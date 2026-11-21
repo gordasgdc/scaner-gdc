@@ -14,5 +14,5 @@ BYTES="$(stat -f %z "$DMG")"; SIZE="$(python3 -c "print(f'{$BYTES/1e6:.1f} MB')"
 MNT="$(hdiutil attach "$DMG" -nobrowse -readonly | awk -F'\t' '/\/Volumes\//{print $NF}' | head -1)"
 trap 'hdiutil detach "$MNT" -quiet 2>/dev/null || true' EXIT
 ARCHS="$(lipo -archs "$MNT/Scaner GDC.app/Contents/MacOS/GDCEffectsLibrary")"
-python3 scripts/build-site.py --version "$V" --dmg-size "$SIZE" --sha256 "$SHA" --archs "$ARCHS" "$@"
+python3 scripts/build-site.py --version "$V" --dmg-size "$SIZE" --sha256 "$SHA" --archs "$ARCHS" --dmg-bytes "$BYTES" "$@"
 python3 scripts/verify-site.py

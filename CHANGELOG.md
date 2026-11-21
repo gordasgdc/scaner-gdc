@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0
+- **In-app updates.** *Scaner GDC → Check for Updates…* and Settings → Updates show the installed version and check for a newer one. The app also checks once when it opens (you can turn this off). Results are distinct: update available (with release notes), up to date, or could not check.
+- Nothing is downloaded or installed until you choose **Update Now**. The new version is downloaded with a progress bar (cancellable), verified (same app identity and developer, valid Apple signature and notarization, newer version), then replaces the app, which reopens. Your settings and data are kept. If anything fails, the installed version is left or restored as it was.
+- Prerelease versions are never offered and the app never downgrades itself. Update checks send no identifier or usage data and are not telemetry.
+- Moving from 0.5.1 (which has no updater) to 0.6.0 is a one-time manual download.
+- Privacy and site texts now describe the update check accurately.
+
 ## 0.5.1
 - Licence: GNU GPL v3 only with additional terms (§7); credit line in About; name/logo regime (`branding/`); neutral icon for derived builds; third-party notices.
 - Automatic search results are now **transient** (memory only, never saved): Brave's standard plan does not allow storing results. A found page is opened in the browser and associated manually. Settings explain that the Brave Search API is a separate, optional, experimental service.

@@ -22,9 +22,9 @@ previews it, and lets you set items aside and bring them back. Scanning only rea
 
 ## Download and install
 Releases: https://github.com/gordasgdc/scaner-gdc/releases · Site: https://gordasgdc.github.io/scaner-gdc/
-**Updates:** the app has no self-updater and does not check for updates; to update, download the new release and replace the app. The Corresponding Source of every release is the tagged commit of this repository (including the build scripts).
+**Updates:** from version 0.6.0 the app can check for and install updates itself (Settings → Updates, or *Scaner GDC → Check for Updates…*). It checks once at launch (can be turned off) by downloading `update.json` from the project site; nothing is downloaded or installed until you choose **Update Now**, and the new version is verified (same bundle ID, same Apple Team ID, valid Developer ID signature and notarization ticket, newer version) before it replaces the app. Version 0.5.1 has no updater: moving from 0.5.1 to 0.6.0 is a one-time manual download. The Corresponding Source of every release is the tagged commit of this repository (including the build scripts).
 Open the disk image and drag **Scaner GDC** to Applications. Requires **macOS 14 (Sonoma) or later**; the package is universal (Apple silicon and Intel) and is Developer ID signed and notarized by Apple, with a stapled ticket.
-Network use: scanning is local and needs no internet or account; only the optional product-details features use the internet when you ask. No telemetry, no automatic upload of your inventory ([privacy](docs/PRIVACY.md)).
+Network use: scanning is local and needs no internet or account. The internet is used for the optional product-details features (when you ask) and for the update check at launch (can be turned off). No telemetry, no automatic upload of your inventory ([privacy](docs/PRIVACY.md)).
 
 ## Reporting problems
 Open an issue and use the template (`.github/ISSUE_TEMPLATE`). Please include the app version, macOS version, what you did and what you expected.

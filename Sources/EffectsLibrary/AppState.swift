@@ -53,6 +53,11 @@ final class AppState {
     var enrichProgress: (done: Int, total: Int)?
     var enrichSummary: EnrichmentBatchSummary?
     /// True when the user stored their own search key. Automatic discovery exists only then.
+    var updateState: UpdateUIState = .idle
+    var updateSheet: UpdateSheetItem?
+    var updateTask: Task<Void, Never>?
+    var checkUpdatesAtLaunch = (UserDefaults.standard.object(forKey: "checkUpdatesAtLaunch") as? Bool) ?? true { didSet { UserDefaults.standard.set(checkUpdatesAtLaunch, forKey: "checkUpdatesAtLaunch") } }
+    var updater: UpdateService
     var searchKeyPresent = false
     /// Search results are kept in memory only for this session (the provider's terms do not allow storing them).
     var transientCandidates: [String: [SearchCandidate]] = [:]
@@ -82,7 +87,7 @@ final class AppState {
     private var sourcesFile: SourcesFile
     private var scanTask: Task<Void, Never>?
     private var didApplyDevSidebar = false
-    private let appInfo: AppInfo
+    let appInfo: AppInfo
     let standardSources: [SourceDescriptor]
 
     enum PreviewState { case loading, image(NSImage, isRender: Bool), unavailable(String) }
@@ -102,6 +107,7 @@ final class AppState {
         let netFetcher = URLSessionFetcher()
         enrichment = EnrichmentService(store: enrichmentStore, fetcher: netFetcher, search: BraveSearchProvider(fetcher: netFetcher, keyProvider: { SearchKeyStore.read() }), log: log)
         searchKeyPresent = SearchKeyStore.read() != nil
+        updater = UpdateService(fetcher: netFetcher, downloader: netFetcher, installedVersion: v, log: log)
         management = ManagementEngine(journal: journal, log: log, hosts: RunningAppsProbe())
         let sf = (try? JSONStore<SourcesFile>(url: st.sourcesFile).loadValidated()) ?? SourcesFile()
         sourcesFile = sf
@@ -118,6 +124,7 @@ final class AppState {
             Task { await self.recoverAndScan() }
         }
         refreshJournal()
+        checkForUpdatesAtLaunch()
         Task { await self.loadProducts() }
     }
 

@@ -19,7 +19,7 @@ step "codesign verify" codesign --verify --strict "$APP"
 step "bundle id + min OS" bash -c "plutil -extract CFBundleIdentifier raw '$APP/Contents/Info.plist' | grep -qx dev.gordas.GDCEffectsLibrary && plutil -extract LSMinimumSystemVersion raw '$APP/Contents/Info.plist' | grep -qx 14.0"
 step "no personal paths in shipped sources" bash -c "! grep -rE '/Users/gordasgdc|CristiGordas' Sources/EffectsLibrary Sources/EffectsLibraryCore Sources/EffectsLibraryEngine"
 step "site checks (anchors, links, no JS, parity, preview state)" python3 scripts/verify-site.py
-step "release script does not delete the release folder" bash -c "! grep -nE 'rm -rf +\"?\\$(OUT|REL|GEL_OUT)\"?( |$)' scripts/release.sh"
+step "release script does not delete the release folder" bash -c '! grep -nE "rm -rf +\"?\$(OUT|REL|GEL_OUT)\"?( |$)" scripts/release.sh'
 step "public tree has no personal identifiers" scripts/public-tree.sh check
 step "no attribution lines in git history" bash -c "! git log --format=%B 2>/dev/null | grep -qiE 'co-authored-by: *claude|anthropic'"
 step "no literal colors outside Theme" bash -c "! grep -rnE 'Color\\((red|\\.sRGB)|Color\\.(black|white|red|blue|green|gray)|\\.foregroundColor\\(\\.(black|white)' Sources/EffectsLibrary | grep -v Theme.swift"

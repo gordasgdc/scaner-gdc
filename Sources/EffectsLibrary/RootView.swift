@@ -22,6 +22,7 @@ struct RootView: View {
         .onChange(of: state.query) { _, _ in state.dropSelectionIfHidden() }
         .toolbar { LibraryToolbar() }
         .sheet(item: $state.pending) { p in ConfirmOperationView(pending: p) }
+        .sheet(item: $state.updateSheet) { _ in UpdateSheet() }
         .sheet(item: $state.pendingConsent) { r in ConsentSheet(request: r) }
         .sheet(item: $state.pendingAssociate) { it in AssociateSheet(item: it) }
         .sheet(isPresented: Binding(get: { state.pendingBatch != nil }, set: { if !$0 { state.pendingBatch = nil } })) { BatchSheet(items: state.pendingBatch ?? []) }

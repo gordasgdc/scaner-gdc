@@ -29,6 +29,7 @@ struct EffectsLibraryApp: App {
                     ])
                 }
             }
+            CommandGroup(after: .appInfo) { Button("Check for Updates…") { state.checkForUpdatesManually() } }
             LibraryCommands(state: state)
         }
 

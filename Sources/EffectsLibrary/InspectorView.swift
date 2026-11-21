@@ -182,6 +182,13 @@ struct SettingsView: View {
                 Button("Clear Fetched Covers") { state.clearFetchedCovers() }
                 Text("Clearing removes downloaded covers only. Associations, details and images you chose are kept.").typo(.caption).foregroundStyle(Theme.Palette.textSecondary)
             }
+            Section("Updates") {
+                Text("Installed version: \(state.appInfo.version) (\(state.appInfo.build))").typo(.body)
+                Toggle("Check for updates when the app opens", isOn: $state.checkUpdatesAtLaunch)
+                Button("Check for Updates…") { state.checkForUpdatesManually() }
+                Text("The check downloads a small public file (update.json) from the project's website. No identifier, inventory or usage data is sent. Nothing is installed until you choose “Update Now”; the new version is verified (same developer, same app identity) before it replaces this app. This is not telemetry.")
+                    .typo(.caption).foregroundStyle(Theme.Palette.textSecondary).fixedSize(horizontal: false, vertical: true)
+            }
             Section("Disabled items location") {
                 Text(state.disabledRootOverride ?? "Next to each source folder (same volume, recommended).").typo(.caption)
                 HStack {
@@ -205,6 +212,6 @@ struct SettingsView: View {
             Section("Data") { Text(state.dataOriginNote).typo(.caption).foregroundStyle(Theme.Palette.textSecondary) }
         }
         .formStyle(.grouped)
-        .frame(width: 460, height: 680)
+        .frame(width: 460, height: 780)
     }
 }

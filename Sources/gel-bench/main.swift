@@ -61,6 +61,38 @@ if args[1] == "net-probe" {
     exit(0)
 }
 
+
+// REAL update-flow harness (isolated test, never used by the shipped app): drives the real UpdateService/Verifier/Installer
+// against a locally built, signed DMG. The network layer is replaced by a local stub; all verification and installation is real.
+//   gel-bench update-run <installedVersion> <targetApp> <dmg> <announcedVersion> <workDir> [wrong-sha|wrong-size|cancel]
+if args[1] == "update-run" {
+    guard args.count >= 7 else { print("usage: gel-bench update-run <installedVersion> <targetApp> <dmg> <announcedVersion> <workDir> [wrong-sha]"); exit(2) }
+    let dmg = URL(fileURLWithPath: args[4]); let target = URL(fileURLWithPath: args[3]); let work = URL(fileURLWithPath: args[6], isDirectory: true)
+    let mode = args.count > 7 ? args[7] : ""
+    let sha = mode == "wrong-sha" ? String(repeating: "0", count: 64) : (try UpdateVerifier.sha256(of: dmg))
+    let size = (try FileManager.default.attributesOfItem(atPath: dmg.path)[.size] as? Int) ?? 0
+    let pre = "https://github.com/gordasgdc/scaner-gdc/releases/download/v\(args[5])/"
+    let man = "{\"version\":\"\(args[5])\",\"build\":\"1\",\"changes\":\"harness\",\"mandatory\":false,\"download_url\":{\"mac\":\"\(pre)\(dmg.lastPathComponent)\"},\"sha256\":\"\(sha)\",\"size\":\(size),\"min_os\":\"14.0\"}"
+    struct Stub: HTTPFetcher, HTTPDownloader {
+        let manifest: Data; let dmg: URL
+        func fetch(_ url: URL, limits: FetchLimits) async throws -> FetchResult { FetchResult(data: manifest, finalURL: url, contentType: "application/json") }
+        func download(_ url: URL, maxBytes: Int64, timeout: TimeInterval, to file: URL, progress: @escaping @Sendable (Int64, Int64?) -> Void) async throws {
+            try FileManager.default.copyItem(at: dmg, to: file); progress(Int64(1), Int64(1))
+        }
+    }
+    let stub = Stub(manifest: Data(man.utf8), dmg: dmg)
+    let svc = UpdateService(fetcher: stub, downloader: stub, installedVersion: args[2])
+    try? FileManager.default.createDirectory(at: work, withIntermediateDirectories: true)
+    switch await svc.check() {
+    case .failed(let f): print("check: FAILED — \(f)"); exit(1)
+    case .upToDate(let i, let l): print("check: up to date (installed \(i), latest \(l))"); exit(0)
+    case .available(let o):
+        print("check: update available \(o.version)")
+        let r = await svc.install(o, target: target, workDir: work, relaunch: false) { print("  phase: \($0)") }
+        switch r { case .success(let v): print("install: OK → \(v)"); exit(0); case .failure(let f): print("install: FAILED — \(f)"); exit(1) }
+    }
+}
+
 if args[1] == "fixtures" {
     guard args.count >= 4 else { print("usage: gel-bench fixtures <dir> <storageRoot> [counts]"); exit(2) }
     let n = args.dropFirst(4).compactMap { Int($0) }

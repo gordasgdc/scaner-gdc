@@ -14,11 +14,11 @@ concurrency:
   group: pages
   cancel-in-progress: false
 jobs:
-  deploy:
+  # Two jobs on purpose: deploy-pages lists the run's artifacts through the REST API. When upload and deploy share one job, the
+  # listing runs within a second of the upload and can return 0 artifacts (observed, docs/PAGES_DIAGNOSIS.md). A separate job
+  # starts on a new runner after the upload job has finished, and "Re-run failed jobs" re-runs only the deploy job (no duplicate artifact).
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - name: Check site (no JS, no empty links, no personal paths)
@@ -30,5 +30,12 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
